@@ -9,8 +9,24 @@ echo "
 
  
 Usage: 
-./Autosec -i 10.1.10.0/24"
+./Autosec.sh <function> <target>
 
+    Example 1 - External domain enumeration: 
+    ./Autosec.sh -x google.com
+
+    Example 2 - Internal network enumeration: 
+    ./Autosec.sh -i 10.1.10.0/24
+
+    Example 3 - email filtering security test:
+     ./Autosec.sh -e"
+
+
+
+if [ $# -ne 1 ]; then
+    echo "Usage: ./Autosec.sh -x <domain>"
+    echo "Example: ./Autosec.sh -x google.com"
+    exit 1
+fi
 
 #subfinder command that gets all domain names
 echo "Finding all subdomains..."
