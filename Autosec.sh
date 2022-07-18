@@ -85,6 +85,17 @@ case $opt in
 
     #email filtering security test
     e)
+        # Test 1 - Send an exe
+        sleep 1
+        sendEmail \
+        -f "$FROM" \
+        -t "$TO" \
+        -s "$SERVER" \
+        -u "This is test number 1" \
+        -m "This is the first test - exe attached" \
+        -o tls=no \
+        -a /root/test-email/attachments/putty.exe
+
     
         ;;
 
