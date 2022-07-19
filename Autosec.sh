@@ -85,8 +85,8 @@ case $opt in
 
     #email filtering security test
     e)
-        TO=daniel.hahn\@ward.ie
-        FROM=danhahn15\@gmail.com
+        TO=xxx\@gmail.ie
+        FROM=xxx\@gmail.com
         SERVER=xxx.outlook.com:25
 
         # Test 1 - Send normal email to test connection
@@ -98,6 +98,94 @@ case $opt in
         -u "This is test number 1 - normal email" \
         -m "This is test number 1 - normal email" \
         -o tls=no \
+
+        # Test 2 - Send an exe
+        sleep 1
+        sendEmail \
+        -f "$FROM" \
+        -t "$TO" \
+        -s "$SERVER" \
+        -u "This is test number 2 - executable file" \
+        -m "This is the second test - exe attached" \
+        -o tls=no \
+
+        # Test 3 - Send a virus in 4 forms
+        sleep 1
+        sendEmail \
+        -f "$FROM" \
+        -t "$TO" \
+        -s "$SERVER" \
+        -u "This is test number 3a - malware" \
+        -m "This is the third test - malware attached" \
+        -o tls=no \
+
+        sleep 1
+        sendEmail \
+        -f "$FROM" \
+        -t "$TO" \
+        -s "$SERVER" \
+        -u "This is test number 3b - malware" \
+        -m "This is the third test - malware attached" \
+        -o tls=no \
+
+
+        sleep 1
+        sendEmail \
+        -f "$FROM" \
+        -t "$TO" \
+        -s "$SERVER" \
+        -u "This is test number 3c - malware" \
+        -m "This is the third test - malware attached" \
+        -o tls=no \
+
+        sleep 1
+        sendEmail \
+        -f "$FROM" \
+        -t "$TO" \
+        -s "$SERVER" \
+        -u "This is test number 3d - malware" \
+        -m "This is the third test - malware attached" \
+        -o tls=no \
+    
+        # Test 4 - Send an email with a spoofed internal address
+        sleep 1
+        sendEmail \
+        -f "$FROMSPOOFINTERNAL" \
+        -t "$TO" \
+        -s "$SERVER" \
+        -o tls=no \
+        -u "This is test number 4 - spoofed internal email address" \
+        -m "This is the fourth test - spoofed internal email address" 
+    
+        # Test 5 - Send an email with a spoofed internal address and an SPF soft fail
+        sleep 1
+        sendEmail \
+        -f "$FROMSPOOFSPF_SOFT" \
+        -t "$TO" \
+        -s "$SERVER" \
+        -o tls=no \
+        -u "This is test number 5 - spoofed external email address with SPF Soft Fail" \
+        -m "This is the fifth test - spoofed external ewmail address with SPF Soft Fail" 
+        
+        # Test 6 - Send an email with a spoofed internal address and SPF hard fail
+        sleep 1
+        sendEmail \
+        -f "$FROMSPOOFSPF_HARD" \
+        -t "$TO" \
+        -s "$SERVER" \
+        -o tls=no \
+        -u "This is test number 6 - spoofed external email address with SPF Hard Fail" \
+        -m "This is the sixth test - spoofed external ewmail address with SPF Hard Fail"
+    
+        # Test 7 - Send an email with an embedded URL
+        sleep 1
+        sendEmail \
+        -f "$FROM" \
+        -t "$TO" \
+        -s "$SERVER" \
+        -o tls=no \
+        -u "This is test number 7 - Embedded URL" \
+        -m "This is the seventh test - embedded URL https://www.google.com"
         ;;
 
 esac
