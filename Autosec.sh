@@ -85,18 +85,19 @@ case $opt in
 
     #email filtering security test
     e)
-        # Test 1 - Send an exe
+        TO=daniel.hahn\@ward.ie
+        FROM=danhahn15\@gmail.com
+        SERVER=xxx.outlook.com:25
+
+        # Test 1 - Send normal email to test connection
         sleep 1
         sendEmail \
         -f "$FROM" \
         -t "$TO" \
         -s "$SERVER" \
-        -u "This is test number 1" \
-        -m "This is the first test - exe attached" \
+        -u "This is test number 1 - normal email" \
+        -m "This is test number 1 - normal email" \
         -o tls=no \
-        -a /root/test-email/attachments/putty.exe
-
-    
         ;;
 
 esac
