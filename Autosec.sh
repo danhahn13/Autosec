@@ -85,9 +85,18 @@ case $opt in
 
     #email filtering security test
     e)
+        #modify the details below
         TO=xxx\@gmail.ie
         FROM=xxx\@gmail.com
         SERVER=xxx.outlook.com:25
+
+        #Spoofed address
+        SPOOFINTERNAL=ceo\@hki.com
+
+        #Spoof external email with softfail(~all) and hardfail(-all).
+        SPOOFSPF_SOFT=ceo\@dell.com
+        SPOOFSPF_HARD=ceo\@amazon.com
+
 
         # Test 1 - Send normal email to test connection
         sleep 1
@@ -150,7 +159,7 @@ case $opt in
         # Test 4 - Send an email with a spoofed internal address
         sleep 1
         sendEmail \
-        -f "$FROMSPOOFINTERNAL" \
+        -f "$SPOOFINTERNAL" \
         -t "$TO" \
         -s "$SERVER" \
         -o tls=no \
@@ -160,7 +169,7 @@ case $opt in
         # Test 5 - Send an email with a spoofed internal address and an SPF soft fail
         sleep 1
         sendEmail \
-        -f "$FROMSPOOFSPF_SOFT" \
+        -f "$SPOOFSPF_SOFT" \
         -t "$TO" \
         -s "$SERVER" \
         -o tls=no \
@@ -170,7 +179,7 @@ case $opt in
         # Test 6 - Send an email with a spoofed internal address and SPF hard fail
         sleep 1
         sendEmail \
-        -f "$FROMSPOOFSPF_HARD" \
+        -f "$SPOOFSPF_HARD" \
         -t "$TO" \
         -s "$SERVER" \
         -o tls=no \
