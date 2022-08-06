@@ -12,19 +12,22 @@ echo "
     Daniel Hahn
 "
 
+#Choice of functionality
+OPTION=$(zenity --list --column="Options" --title="Choose an option" "External enumeration" "Internal enumeration" "Email filtering test")
 
-OPTION=$(zenity --list --column="Options" --title="Choose an option" "External enumeration" \ "Internal enumeration" \ "Email filtering test")
-
+#If statement for choice of functionality
 if [[ $OPTION == "External enumeration" ]]; then
 
+    #User enters domain
     DOMAIN=$(zenity --entry --text "Enter your domain" --title "External Enumeration" --entry-text="Example: google.com")
 
     function external () {
 
-    #subfinder command that gets all domain names
+        #progress bar
         echo "# Finding all subdomains..."
-        echo "33"
+        echo "25"
 
+        #subfinder command that gets all domain names
         subfinder -d $DOMAIN -o subdomains.txt
 
         #Regex to extract only third-level domain names with no duplicates.
@@ -49,58 +52,75 @@ if [[ $OPTION == "External enumeration" ]]; then
 
         #Finding which domains are alive
         echo "# Extracting only live domains..."
-        echo "66"
+        echo "50"
         cat subdomains.txt | sort -u |httprobe -s -p https:443 | sed 's/https\?:\/\///' | tr -d ":443" > live-subdomains.txt
 
         #Performing a TCP and UDP port scan on all live hosts and saving into a directory
         echo "# Performing a TCP port scan..."
-        echo "90"
+        echo "75"
         if [ ! -d "scannedhosts" ]; then
             mkdir scannedhosts
         fi
         nmap -Pn --top-ports 10 -iL live-subdomains.txt -oN scannedhosts/TCP.txt
 
-        echo "Performing a UDP port scan..."
+        echo "# Performing a UDP port scan..."
+        echo "100"
         nmap -Pn -sU --top-ports 10 -iL live-subdomains.txt -oN scannedhosts/UDP.txt
     }
+    #progress bar
     external | zenity --progress --title "External Enumeration" --auto-close
 
 
 
 elif [[ $OPTION == "Internal enumeration" ]]; then
 
+    #User enters IP range
     IP=$(zenity --entry --text "Enter your IP range" --title "Internal Enumeration" --entry-text="Example: 10.1.10.0/24")
 
     function internal () {
 
         #mapping the network
-        echo "Mapping the network..."
+        echo "# Mapping the network..."
+        echo "33"
         nmap -sn $IP -oN livehosts.txt
 
         #take out everythhing but the ip addresses so we can perform further scanning
         cat livehosts.txt | awk '/is up/ {print up}; {gsub (/\(|\)/,""); up =$NF}' > livehosts-list.txt
 
-        #performing a port scan on live hosts
-        nmap -Pn --top-ports 10 -iL livehosts-list.txt -oN portscans.txt
+        #performing a TCP and UDP port scan on live hosts
+        if [ ! -d "portscans" ]; then
+            mkdir portscans
+        fi
+
+        echo "# Performing a TCP port scan..."
+        echo "66"
+        nmap -Pn --top-ports 10 -iL livehosts-list.txt -oN portscans/TCP.txt
+
+        echo "# Performing a UDP port scan..."
+        echo "100"
+        nmap -Pn -sU --top-ports 10 -iL livehosts-list.txt -oN portscans/UDP.txt
     }
+    #Progress bar
     internal | zenity --progress --title "Internal Enumeration" --auto-close
 
-elif [[ $OPTION="Email filtering test" ]]; then
+elif [[ $OPTION == "Email filtering test" ]]; then
 
     #modify the details below
-        TO=$(zenity --entry --text "Enter the target email" --title "Email Filtering Test" --entry-text="Example: johndoe@tesla.com")
-        FROM=$(zenity --entry --text "Enter the sender email" --title "Email Filtering Test" --entry-text="Example: janedoe@tesla.com")
-        SERVER=$(zenity --entry --text "Enter the SMTP address and port" --title "Email Filtering Test" --entry-text="Example: xxx.outlook.com:25")
+    TO=$(zenity --entry --text "Enter the target email" --title "Email Filtering Test" --entry-text="Example: johndoe@tesla.com")
+    FROM=$(zenity --entry --text "Enter the sender email" --title "Email Filtering Test" --entry-text="Example: janedoe@tesla.com")
+    SERVER=$(zenity --entry --text "Enter the SMTP address and port" --title "Email Filtering Test" --entry-text="Example: xxx.outlook.com:25")
 
-        #Spoofed address
-        SPOOFINTERNAL=$(zenity --entry --text "Spoof an internal address" --title "Email Filtering Test" --entry-text="Example: janedoe@tesla.com")
+    #Spoofed address
+    SPOOFINTERNAL=$(zenity --entry --text "Spoof an internal address" --title "Email Filtering Test" --entry-text="Example: janedoe@tesla.com")
 
-        #Spoof external email with softfail(~all) and hardfail(-all).
-        SPOOFSPF_SOFT=ceo\@dell.com
-        SPOOFSPF_HARD=ceo\@amazon.com
+    #Spoof external email with softfail(~all) and hardfail(-all).
+    SPOOFSPF_SOFT=ceo\@dell.com
+    SPOOFSPF_HARD=ceo\@amazon.com
 
-
+    function email () {
         # Test 1 - Send normal email to test connection
+        echo "# Test 1..."
+        echo "17"
         sleep 1
         sendEmail \
         -f "$FROM" \
@@ -111,6 +131,8 @@ elif [[ $OPTION="Email filtering test" ]]; then
         -o tls=no \
 
         # Test 2 - Send an exe
+        echo "# Test 2..."
+        echo "34"
         sleep 1
         sendEmail \
         -f "$FROM" \
@@ -120,46 +142,57 @@ elif [[ $OPTION="Email filtering test" ]]; then
         -m "This is the second test - exe attached" \
         -o tls=no \
 
-    
+
         # Test 3 - Send an email with a spoofed internal address
+        echo "# Test 3..."
+        echo "51"
         sleep 1
         sendEmail \
         -f "$SPOOFINTERNAL" \
         -t "$TO" \
         -s "$SERVER" \
         -o tls=no \
-        -u "This is test number 4 - spoofed internal email address" \
-        -m "This is the fourth test - spoofed internal email address" 
-    
+        -u "This is test number 3 - spoofed internal email address" \
+        -m "This is the third test - spoofed internal email address" 
+
         # Test 4 - Send an email with a spoofed internal address and an SPF soft fail
+        echo "# Test 4..."
+        echo "68"
         sleep 1
         sendEmail \
         -f "$SPOOFSPF_SOFT" \
         -t "$TO" \
         -s "$SERVER" \
         -o tls=no \
-        -u "This is test number 5 - spoofed external email address with SPF Soft Fail" \
-        -m "This is the fifth test - spoofed external ewmail address with SPF Soft Fail" 
+        -u "This is test number 4 - spoofed external email address with SPF Soft Fail" \
+        -m "This is the fourth test - spoofed external email address with SPF Soft Fail" 
         
         # Test 5 - Send an email with a spoofed internal address and SPF hard fail
+        echo "# Test 5..."
+        echo "74"
         sleep 1
         sendEmail \
         -f "$SPOOFSPF_HARD" \
         -t "$TO" \
         -s "$SERVER" \
         -o tls=no \
-        -u "This is test number 6 - spoofed external email address with SPF Hard Fail" \
-        -m "This is the sixth test - spoofed external ewmail address with SPF Hard Fail"
-    
+        -u "This is test number 5 - spoofed external email address with SPF Hard Fail" \
+        -m "This is the fifth test - spoofed external ewmail address with SPF Hard Fail"
+
         # Test 6 - Send an email with an embedded URL
+        echo "# Test 6.."
+        echo "100"
         sleep 1
         sendEmail \
         -f "$FROM" \
         -t "$TO" \
         -s "$SERVER" \
         -o tls=no \
-        -u "This is test number 7 - Embedded URL" \
-        -m "This is the seventh test - embedded URL https://www.google.com"
+        -u "This is test number 6 - Embedded URL" \
+        -m "This is the sixth test - embedded URL https://www.google.com"
+    }
+    #Progress bar
+    email | zenity --progress --title "Email filtering test" --auto-close
        
 
 else
