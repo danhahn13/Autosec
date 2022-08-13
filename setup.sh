@@ -2,7 +2,7 @@
 
 sudo apt-get install nmap -y
 
-sudo apt install sublist3r -y
+sudo apt install subfinder -y
 
 sudo apt install httprobe -y
 

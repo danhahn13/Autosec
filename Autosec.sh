@@ -20,12 +20,28 @@ if [[ $OPTION == "External enumeration" ]]; then
 
     #User enters domain
     DOMAIN=$(zenity --entry --text "Enter your domain" --title "External Enumeration" --entry-text="Example: google.com" --width=600 --height=400)
+    if [ "$?" != 0 ]
+    then
+        exit
+    fi
 
     function external () {
 
         #progress bar
         echo "# Finding all subdomains..."
         echo "25"
+
+        #Create folders
+        if [ ! -d $DOMAIN ]; then
+            mkdir $DOMAIN
+        fi
+        if [ ! -d third ]; then
+            mkdir third
+        fi
+        if [ ! -d $DOMAIN/scannedhosts ]; then
+            mkdir $DOMAIN/scannedhosts
+        fi
+        
 
         #subfinder command that gets all domain names
         subfinder -d $DOMAIN -o $DOMAIN/subdomains.txt
@@ -58,9 +74,9 @@ if [[ $OPTION == "External enumeration" ]]; then
         nmap -Pn --top-ports 10 -iL $DOMAIN/live-subdomains.txt -oN $DOMAIN/scannedhosts/TCP.txt
 
         echo "# Performing a UDP port scan..."
-        echo "100"
+        echo "99"
 
-        nmap -Pn -sU --top-ports 10 -iL $DOMAIN/live-subdomains.txt -oN $DOMAIN/scannedhosts/UDP.txt
+        sudo nmap -Pn -sU --top-ports 10 -iL $DOMAIN/live-subdomains.txt -oN $DOMAIN/scannedhosts/UDP.txt
     }
     #progress bar
     external | zenity --progress --title "External Enumeration" --auto-close --width=600 --height=400
@@ -71,8 +87,23 @@ elif [[ $OPTION == "Internal enumeration" ]]; then
 
     #User enters IP range
     IP=$(zenity --entry --text "Enter your IP range" --title "Internal Enumeration" --entry-text="Example: 10.1.10.0/24" --width=600 --height=400)
+    if [ "$?" != 0 ]
+    then
+        exit
+    fi
 
     function internal () {
+
+        #Remove CIDR notation from variable
+        IP2=${IP::-3}
+
+        #Create folders
+        if [ ! -d $IP2 ]; then
+            mkdir $IP2
+        fi
+        if [ ! -d $IP2/portscans ]; then
+            mkdir $IP2/portscans
+        fi
 
         #mapping the network
         echo "# Mapping the network..."
@@ -81,18 +112,21 @@ elif [[ $OPTION == "Internal enumeration" ]]; then
         nmap -sn $IP -oN livehosts.txt
 
         #take out everythhing but the ip addresses so we can perform further scanning
-        cat livehosts.txt | awk '/is up/ {print up}; {gsub (/\(|\)/,""); up =$NF}' > $IP/livehosts-list.txt
+        cat livehosts.txt | awk '/is up/ {print up}; {gsub (/\(|\)/,""); up =$NF}' > $IP2/livehosts-list.txt
+
+        #clear extra files
+        rm livehosts.txt
 
         #performing a TCP and UDP port scan on live hosts
         echo "# Performing a TCP port scan..."
         echo "66"
 
-        nmap -Pn --top-ports 10 -iL $IP/livehosts-list.txt -oN $IP/portscans/TCP.txt
+        nmap -Pn --top-ports 10 -iL $IP2/livehosts-list.txt -oN $IP2/portscans/TCP.txt
 
         echo "# Performing a UDP port scan..."
-        echo "100"
+        echo "99"
 
-        nmap -Pn -sU --top-ports 10 -iL $IP/livehosts-list.txt -oN $IP/portscans/UDP.txt
+        sudo nmap -Pn -sU --top-ports 10 -iL $IP2/livehosts-list.txt -oN $IP2/portscans/UDP.txt
     }
     #Progress bar
     internal | zenity --progress --title "Internal Enumeration" --auto-close --width=600 --height=400
@@ -101,11 +135,27 @@ elif [[ $OPTION == "Email filtering test" ]]; then
 
     #User enters email detaisl
     TO=$(zenity --entry --text "Enter the target email" --title "Email Filtering Test" --entry-text="Example: johndoe@tesla.com" --width=600 --height=400)
+    if [ "$?" != 0 ]
+    then
+        exit
+    fi
     FROM=$(zenity --entry --text "Enter the sender email" --title "Email Filtering Test" --entry-text="Example: janedoe@tesla.com" --width=600 --height=400)
+    if [ "$?" != 0 ]
+    then
+        exit
+    fi
     SERVER=$(zenity --entry --text "Enter the SMTP address and port" --title "Email Filtering Test" --entry-text="Example: xxx.outlook.com:25" --width=600 --height=400)
+    if [ "$?" != 0 ]
+    then
+        exit
+    fi
 
     #Spoofed address
     SPOOFINTERNAL=$(zenity --entry --text "Spoof an internal address" --title "Email Filtering Test" --entry-text="Example: janedoe@tesla.com" --width=600 --height=400)
+    if [ "$?" != 0 ]
+    then
+        exit
+    fi
 
     #Spoof external email with softfail(~all) and hardfail(-all).
     SPOOFSPF_SOFT=ceo\@dell.com
