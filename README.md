@@ -1,7 +1,6 @@
-Autosec is a tool designed to automate various tasks related to penetration testing
 ## About Autosec
 
-Sublist3r is a bash tool designed to automate various penetration testing tasks. It helps penetration testers and bug hunters tests systems and save time by automating repetitive tasks. The options currently available are:
+Autosec is a bash tool designed to automate various penetration testing tasks. It helps penetration testers and bug hunters tests systems and save time by automating repetitive tasks. The options currently available are:
 
 * **External Domain Enumeration:** This enumerates a given domain by finding live subdomains and performing port scans.
 * **Internal Network Enumeration:** This enumerates an internal network by mapping the network and performing port scans.
